@@ -14,21 +14,10 @@ export async function loginController(req: Request, res: Response) {
 
     const user = await userService.validateUser(email, password);
 
-    if (user) {
-      // @ts-ignore
-      if (req?.session?.userId) {
-        // @ts-ignore
-        req.session.userId = user.id; // отслеживания сессии пользователя
-
-        res.status(200).send({ message: "Login successful" });
-      }
-
-      return null;
-    } else {
-      res.status(401).send({ message: "Invalid credentials" });
-    }
+    (req.session as { userId?: number }).userId = user.id;
+    res.status(200).send({ message: "Login successful" });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: "Internal server error" });
+    res.status(401).send({ message: "Invalid credentials" });
   }
 }

@@ -31,6 +31,7 @@ export class UserService {
     }
 
     const isValid = await bcrypt.compare(plainPassword, user.password);
+
     if (!isValid) {
       throw new Error("Invalid credentials");
     }
@@ -43,6 +44,12 @@ export class UserService {
    * @returns {Promise<User[]>} Promise object representing an array of users.
    */
   async findAllUsers() {
-    return this.userRepository.findAllUsers();
+    const users = await this.userRepository.findAllUsers();
+    return users.map((user) => {
+      return {
+        id: user.id,
+        email: user.email,
+      };
+    });
   }
 }

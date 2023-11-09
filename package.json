@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/index.ts",
+    "dev": "nodemon src/index.ts",
     "migrate": "npx prisma migrate dev",
     "studio": "npx prisma studio"
   },

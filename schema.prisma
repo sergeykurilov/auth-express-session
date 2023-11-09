@@ -1,0 +1,30 @@
+model User {
+  id        Int      @id @default(autoincrement()) // Уникальный идентификатор пользователя.
+  email     String   @unique                       // Электронная почта пользователя, уникальная.
+  password  String                                 // Хешированный пароль пользователя.
+  sessions  Session[]                              // Связанные сессии пользователя один-ко-многим.
+  //
+}
+
+model Session {
+  id         String   @id @default(uuid())         // Уникальный идентификатор сессии.
+  userId     Int                                    // Ссылка на пользователя.
+  valid      Boolean  @default(true)               // Флаг валидности сессии.
+  userAgent  String?                                // Информация о устройстве пользователя.
+  createdAt  DateTime @default(now())              // Дата и время создания сессии.
+  updatedAt  DateTime @default(now())              // Дата и время последнего обновления сессии.
+  ipAddress  String?                                // IP-адрес сессии.
+  expiresAt  DateTime?                              // Время истечения сессии.
+  lastUsedAt DateTime @default(now())              // Время последнего использования сессии.
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Связь с пользователем один-ко-многим.
+}
+
+datasource db {
+  provider = "sqlite"                               // Используемый провайдер базы данных: SQLite.
+  url      = "file:./var/db/dev.db"                // Путь к файлу базы данных SQLite.
+}
+
+generator client {
+  provider = "prisma-client-js"
+}

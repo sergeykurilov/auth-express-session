@@ -14,6 +14,7 @@ export async function loginController(req: Request, res: Response) {
 
     const user = await userService.validateUser(email, password);
 
+    // @ts-ignore
     req.session.userId = user.id;
     req.session.save((err) => {
       if (err) {

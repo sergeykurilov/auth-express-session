@@ -13,11 +13,15 @@ router.get("/user", authenticate, userController);
 router.get("/healthcheck", (req: Request, res: Response) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
-router.get("/logout", async function (req, res, next) {
-  req.session.destroy(function () {
-    console.log("Destroyed session");
+router.get("/logout", (req: Request, res: Response) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destruction error:", err);
+      return res.status(500).send({ message: "Failed to log out." });
+    }
+    console.log("Session destroyed.");
+    res.redirect("/");
   });
-  res.redirect("/");
 });
 
 export default router;

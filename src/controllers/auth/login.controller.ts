@@ -14,8 +14,14 @@ export async function loginController(req: Request, res: Response) {
 
     const user = await userService.validateUser(email, password);
 
-    (req.session as { userId?: number }).userId = user.id;
-    res.status(200).send({ message: "Login successful" });
+    req.session.userId = user.id;
+    req.session.save((err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send({ message: "Error saving session." });
+      }
+      res.status(200).send({ message: "Login successful" });
+    });
   } catch (error) {
     console.error(error);
     res.status(401).send({ message: "Invalid credentials" });

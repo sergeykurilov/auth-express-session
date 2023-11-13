@@ -20,27 +20,11 @@ router.get("/logout", async (req: Request, res: Response) => {
     req.session as Session & Partial<SessionData> & { sessionId: string }
   ).sessionId;
 
-  const session = await prisma.session.findUnique({
+  await prisma.session.delete({
     where: {
       id: sessionId,
     },
   });
-
-  if (
-    session &&
-    new Date() <
-      new Date(
-        (
-          req.session as Session & Partial<SessionData> & { expiresAt: string }
-        ).expiresAt,
-      )
-  ) {
-    await prisma.session.delete({
-      where: {
-        id: sessionId,
-      },
-    });
-  }
 
   req.session.destroy((err) => {
     if (err) {

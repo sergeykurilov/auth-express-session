@@ -7,6 +7,7 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 const SQLiteStore = require("connect-sqlite3")(session);
 
 import controllers from "./controllers";
+import logger from "./utils/logger";
 
 export const app: Application = express();
 
@@ -56,6 +57,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   } else {
     next();
   }
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  logger.info(`Request received: ${req.method} ${req.url}`);
+  next();
 });
 
 app.listen(port, () => {

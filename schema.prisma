@@ -1,31 +1,89 @@
+// Defines the User model.
 model User {
-  id        Int      @id @default(autoincrement()) // Уникальный идентификатор пользователя.
-  email     String   @unique                       // Электронная почта пользователя, уникальная.
-  password  String                                 // Хешированный пароль пользователя.
-  sessions  Session[]                              // Связанные сессии пользователя один-ко-многим.
+  id       Int       @id @default(autoincrement()) // Unique identifier for the user.
+  email    String    @unique // User's email address, must be unique.
+  password String // User's hashed password.
+  sessions Session[] // Sessions associated with the user, one-to-many relationship.
+  profile  Profile? // Optional profile for the user, one-to-one relationship.
+  posts    Post[] // Posts created by the user, one-to-many relationship.
+
+  // Self-referencing many-to-many relationships.
+  // Users that this user is following.
+  following UserFollowers[] @relation("UserFollowing")
+  // Users that are following this user.
+  followers UserFollowers[] @relation("UserFollowed")
+  Comment   Comment[]
 }
 
+// Defines the Profile model.
+model Profile {
+  id     Int    @id @default(autoincrement()) // Unique identifier for the profile.
+  bio    String // Biography or description of the user.
+  userId Int    @unique // References the user ID, unique to ensure one-to-one relationship.
+  user   User   @relation(fields: [userId], references: [id]) // Connects the profile to a specific user.
+}
+
+// Defines the Post model.
+model Post {
+  id       Int       @id @default(autoincrement()) // Unique identifier for the post.
+  title    String // Title of the post.
+  content  String // Content of the post.
+  userId   Int // References the user ID who created the post.
+  user     User      @relation(fields: [userId], references: [id]) // Connects the post to the user who created it.
+  comments Comment[] // Comments on the post, one-to-many relationship.
+  tags     Tag[]     @relation("PostTags") // Tags associated with the post, many-to-many relationship.
+}
+
+// Defines the Comment model.
+model Comment {
+  id     Int    @id @default(autoincrement()) // Unique identifier for the comment.
+  text   String // Text content of the comment.
+  postId Int // References the post ID on which the comment is made.
+  post   Post   @relation(fields: [postId], references: [id]) // Connects the comment to a specific post.
+  userId Int // Foreign key linking the comment to its author's User record.
+  user   User   @relation(fields: [userId], references: [id]) // Relation many-to-one to User model.
+}
+
+// Defines the Tag model.
+model Tag {
+  id    Int    @id @default(autoincrement()) // Unique identifier for the tag.
+  name  String @unique // Name of the tag, must be unique.
+  posts Post[] @relation("PostTags") // Posts associated with this tag, many-to-many relationship.
+}
+
+// Defines the UserFollowers join model for the self-referencing many-to-many relationship.
+model UserFollowers {
+  followerId  Int
+  followingId Int
+  follower    User @relation("UserFollowed", fields: [followerId], references: [id]) // The user who is following.
+  following   User @relation("UserFollowing", fields: [followingId], references: [id]) // The user who is being followed.
+
+  @@id([followerId, followingId]) // Composite primary key for this join table.
+}
+
+// Defines the Session model.
 model Session {
-  id         String   @id @default(uuid())         // Уникальный идентификатор сессии.
-  userId     Int                                    // Ссылка на пользователя.
-  valid      Boolean  @default(true)               // Флаг валидности сессии.
-  userAgent  String?                                // Информация о устройстве пользователя.
-  createdAt  DateTime @default(now())              // Дата и время создания сессии.
-  updatedAt  DateTime @default(now())              // Дата и время последнего обновления сессии.
-  ipAddress  String?                                // IP-адрес сессии.
-  expiresAt  DateTime?                              // Время истечения сессии.
-  lastUsedAt DateTime @default(now())              // Время последнего использования сессии.
-
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Связь с пользователем один-ко-многим.
+  id         String    @id @default(uuid()) // Unique identifier for the session.
+  userId     Int // References the user ID to whom the session belongs.
+  valid      Boolean   @default(true) // Flag indicating if the session is valid.
+  userAgent  String? // Information about the user's device.
+  createdAt  DateTime  @default(now()) // Creation date and time of the session.
+  updatedAt  DateTime  @default(now()) // Date and time of the last update to the session.
+  ipAddress  String? // IP address of the session.
+  expiresAt  DateTime? // Expiration time of the session.
+  lastUsedAt DateTime  @default(now()) // Last time the session was used.
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade) // Connects the session to a specific user.
 }
 
+// Configures the datasource for the database.
 datasource db {
-  provider = "sqlite"                               // Используемый провайдер базы данных: SQLite.
-  url      = "file:./var/db/dev.db"                // Путь к файлу базы данных SQLite.
+  provider = "sqlite" // Database provider, in this case, SQLite.
+  url      = "file:./var/db/dev.db" // Path to the SQLite database file.
 }
 
+// Configures the Prisma client generator.
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Specifies the Prisma client for JavaScript.
 }
 
 // Уникальный индекс для email (email String @unique):

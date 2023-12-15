@@ -6,6 +6,20 @@ import { userController } from "./user/user.controller";
 import { Router } from "express";
 import { prisma } from "../repositories/user/user.repository";
 import { Session, SessionData } from "express-session";
+import {
+  getProfile,
+  updateProfile,
+  createProfile,
+} from "./profile/profile.controller";
+import { createPost, getPostsByUser } from "./post/post.controller";
+import { createComment, getCommentsByPost } from "./comment/comment.controller";
+import { createTag, getAllTags } from "./tag/tag.controller";
+import {
+  followUser,
+  getUserFollowers,
+  getUserFollowing,
+  unfollowUser,
+} from "./userFollowers/userFollowers.controller";
 
 export const router = Router();
 
@@ -34,5 +48,23 @@ router.get("/logout", async (req: Request, res: Response) => {
     res.redirect("/");
   });
 });
+
+router.get("/profile/:userId", getProfile);
+router.post("/profile", createProfile);
+router.put("/profile/:userId", updateProfile);
+
+router.get("/posts/user/:userId", getPostsByUser);
+router.post("/post", createPost);
+
+router.get("/comments/post/:postId", getCommentsByPost);
+router.post("/comment", createComment);
+
+router.get("/tags", getAllTags);
+router.post("/tag", createTag);
+
+router.post("/follow", followUser);
+router.post("/unfollow", unfollowUser);
+router.get("/followers/:userId", getUserFollowers);
+router.get("/following/:userId", getUserFollowing);
 
 export default router;
